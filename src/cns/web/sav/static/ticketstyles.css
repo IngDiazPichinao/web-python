@@ -1,0 +1,81 @@
+
+/**
+ *      DATA CONTAINER
+ */
+.dataTables_wrapper {
+    margin-top: 80px;
+}
+
+
+/**
+ *      DATA TABLES
+ */
+#datatable {
+    width: 98%;
+    margin: auto;
+    margin-bottom: 40px;
+    border-collapse: collapse;
+    font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+}
+
+#datatable thead th {
+    text-align: center;
+    cursor: pointer;
+}
+
+/*#datatable thead th#semaphore {
+    width: 4px;
+}*/
+
+#datatable thead input {
+    color: #444444;
+    margin: 0.5em 0;
+    width: 90%;
+}
+
+#datatable tbody {
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+#datatable tbody td {
+    border: 1px solid grey;
+    height: 22px;
+    text-align: right;
+    padding-left: 6px;
+    padding-right: 2px;
+}
+
+#datatable tbody td#codigo {
+    text-align: left;
+}
+
+#datatable tfoot {
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+#datatable tfoot td {
+    text-align: right;
+    font-weight: bold;
+    padding-left: 6px;
+    padding-right: 2px;
+}
+
+.odd {
+    background-color: #C4FFC4;       /* Weakest Green */
+/*     background-color: #DAFFDA; */ /* Stronger green */
+/*     background-color: #A4FFA4; */ /* Strongest green */
+/*     background-color: #E8EDED; */ /* Systema Guzman Gris */
+}
+
+.even {
+/*     background-color: #D5FFD5; */
+    background-color: #EEFFEE;
+/*      background-color: #FFFFFF; */
+}
+
+.dataTables_info {
+    width: 95%;
+    margin: auto;
+}

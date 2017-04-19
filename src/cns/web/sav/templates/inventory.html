@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/lib/underscore.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/lib/jquery.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/lib/jquery-datatables.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/lib/jquery-datatables-tabletools.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/filters.js') }}"></script>
+<style type="text/css">
+{% include 'sty_tables.css' %}
+</style>
+<script charset="utf-8" type="text/javascript">
+
+$URL_ROOT = {{ request.script_root|tojson|safe }};
+
+
+// Register the Filters
+$.fn.dataTableExt.afnFiltering.push(
+    // TODO this has to be beautyfiable ... currently sucks
+    function( oSettings, aData, iDataIndex ) {
+        var oDataRow =  oSettings.aoData[iDataIndex].nTr; // Table Row
+        var filter_cols = $('thead input[class="filter"]');
+
+        return filter_string(filter_cols.get(0).value,  aData[0] ) &     // almacen
+               filter_string(filter_cols.get(1).value,  aData[4] ) &     // especie
+               filter_string(filter_cols.get(2).value,  aData[5] ) &     // disenio
+               filter_numeric(filter_cols.get(3).value, aData[6] * 1) &  // espesor
+               filter_numeric(filter_cols.get(4).value, aData[7] * 1) &  // ancho
+               filter_numeric(filter_cols.get(5).value, aData[8] * 1) &  // largo
+               filter_string(filter_cols.get(6).value,  aData[9] ) &     // calidad
+               filter_numeric(filter_cols.get(7).value, aData[10] * 1)   // humedad
+    }
+);
+
+
+// // Helper to smoothen filtering (to delay reaction of keyup event)
+var delay = ( function() {
+    var timer = 0;
+
+    return function(callback, ms) {
+        clearTimeout (timer);
+        timer = setTimeout(callback, ms);
+  };
+})();
+
+
+$(document).ready(function() {
+    /*
+    *   jQuery DataTable specific setup
+    */
+    var oTable = $('#datatable').dataTable( {
+        "sDom": 'ti',
+        "bPaginate": false,
+        "bLengthChange": false,
+        "bSortCellsTop": true,
+        "bFilter": true,
+        "bInfo": true,
+        "bAutoWidth": false,
+        "bSort": true,
+        "aaSorting": [ [ 13, "desc" ] ]
+        }
+    );
+
+    calcFooter(oTable);
+
+    // Add event listeners to the filtering inputs
+    $('thead input[class="filter"]').keyup( function() {
+        delay( function() {
+            oTable.fnDraw();
+            calcFooter(oTable);
+        }, 200);
+    });
+
+    // Recalculate the sums of units and inches in the footer
+    function calcFooter( oTable ) {
+        // Get the sums of only the visible rows...
+        var sum_existencia = 0;
+        var sum_requerido  = 0;
+        var sum_disponible = 0;
+        var sum_disponible_neg = 0;
+
+        var oSettings = oTable.fnSettings();
+        var rows = $('tbody tr', oSettings.nTable);
+
+        for (var i=0 ; i < rows.length ; i++) {
+            sum_existencia += parseFloat(rows[i].children[11].textContent);
+            sum_requerido  += parseFloat(rows[i].children[12].textContent);
+
+            disponible = parseFloat(rows[i].children[13].textContent)
+            if ( disponible > 0) {
+                sum_disponible += parseFloat(rows[i].children[13].textContent);
+            } else {
+                sum_disponible_neg += parseFloat(rows[i].children[13].textContent);
+            }
+        }
+
+        // Build necessary strings (html elements with content)
+        var str_total_requerido = sum_existencia.toFixed(2)
+        str_total_requerido += "</br>"
+        str_total_requerido += (sum_existencia - sum_disponible).toFixed(2)
+
+        var str_total_disponible = sum_disponible.toFixed(2)
+        str_total_disponible += "</br>"
+        str_total_disponible += sum_disponible_neg.toFixed(2)
+
+        // Refresh actual content
+        $('tfoot td[id="total_stock"]').prop("innerHTML", str_total_requerido);
+        $('tfoot td[id="total_required"]').prop("innerHTML",  sum_requerido.toFixed(2) + "</br>" + "&nbsp");
+        $('tfoot td[id="total_available"]').prop("innerHTML", str_total_disponible);
+    }
+
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<table id="datatable">
+    <thead>
+        <tr>
+            <th>Almacen</th>
+            <th rowspan="2">Existencia</br>[unidades]</th>
+            <th rowspan="2">Requerido</br>[unidades]</th>
+            <th rowspan="2">Disponible</br>[unidades]</th>
+            <th>Especie</th>
+            <th>Diseño</th>
+            <th>E</th>
+            <th>A</th>
+            <th>L</th>
+            <th>Calidad</th>
+            <th>Humedad</th>
+            <th rowspan="2">Existencia</br>["]</th>
+            <th rowspan="2">Requerido</br>["]</th>
+            <th rowspan="2">Disponible</br>["]</th>
+            <th rowspan="2">Flujo</br>["/mes]</th>
+            <th rowspan="2">Cobertura</br>["/mes]</th>
+        </tr>
+        <tr>
+            <th><input class="filter" type="text" size="5" name="search_storage"></th>
+            <th><input class="filter" type="text" size="5" name="search_specie"></th>
+            <th><input class="filter" type="text" size="5" name="search_design"></th>
+            <th><input class="filter" type="text" size="5" name="search_thickness"></th>
+            <th><input class="filter" type="text" size="5" name="search_width"></th>
+            <th><input class="filter" type="text" size="5" name="search_lenght"></th>
+            <th><input class="filter" type="text" size="5" name="search_quality"></th>
+            <th><input class="filter" type="text" size="5" name="search_humidity"></th>
+        </tr>
+    </thead>
+    <tbody>
+    {%- for item in items -%}
+        <tr class="{{ loop.cycle('odd', 'even') }} green">
+            <td>{{ "{name} [{id:02d}]".format(name=item.storage, id=item.storage_id) }}</td>
+            <td class="col_std">{{ item.total_count }}</td>
+            <td class="col_std">{{ "--" }}</td>
+            <td class="col_high">{{ "--" }}</td>
+            <td>{{ item.specie }}</td>
+            <td>{{ item.design }}</td>
+            <td>{{ item.thickness }}</td>
+            <td>{{ item.width }}</td>
+            <td>{{ "%.2f"|format(item.lenght|round(2)) }}</td>
+            <td>{{ "{item.quality[0]}-{item.quality[1]}".format(item=item) if item.quality is tuple else item.quality }}</td>
+            <td>{{ item.humidity }}</td>
+            <td class="col_std">{{ "%.2f"|format(item.total_inches|round(2)) }}</td>
+            <td class="col_std">{{ "--" }}</td> <!-- "%.2f"|format(row.pulgadas_requerido|round(2)) -->
+            <td class="col_high">{{ "--" }}</td> <!-- "%.2f"|format(row.pulgadas_disponible|round(2)) -->
+            <td class="col_std">{{ "%.2f"|format(item.product_flow|round(2)) if item.product_flow is number else item.product_flow }}</td>
+            <td class="col_high">{{ "--" }}</td> <!-- "%.2f"|format(row.cobertura|round(2)) if row.cobertura is number else row.cobertura -->
+        </tr>
+    {%- endfor -%}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="11"></td>
+            <td id="total_stock"></td>
+            <td id="total_required"></td>
+            <td id="total_available"></td>
+        </tr>
+    </tfoot>
+</table>
+{% endblock %}

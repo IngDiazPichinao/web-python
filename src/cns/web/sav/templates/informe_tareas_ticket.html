@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//ES">
+
+{% macro ticket_div(tarea) -%}
+<table>
+    <tbody>
+        <tr>
+            <td class="title" colspan="2"> Orden de Trabajo </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Pedido: </td>
+            <td class="rcol">  {{ tarea.numero ~"-"~ tarea.linea }} </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Cantidad: </td>
+            <td class="rcol">  {{ tarea.cantidad }} </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Medidas: </td>
+            <td class="rcol">  {{ tarea.thicknesses_thickness ~" x "~ tarea.widths_width ~" x "~ tarea.lengths_length }} </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Especie: </td>
+            <td class="rcol">  {{ tarea.species_tag }} </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Diseño: </td>
+            <td class="rcol">  {{ tarea.design_tag }} </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Calidad: </td>
+            <td class="rcol">  {{ tarea.quality_side_first }} </td>
+        </tr>
+    </tbody>
+</table>
+
+<table height="220">
+    <tbody>
+        <tr>
+            <td class="lcol"> Piezas Pedido: </td>
+            <td class="rcol"> </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Piezas sin nudo: </td>
+            <td class="rcol"></td>
+        </tr>
+        <tr>
+            <td class="lcol"> Piezas primera: </td>
+            <td class="rcol"> </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Piezas segunda: </td>
+            <td class="rcol"> </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Piezas desecho: </td>
+            <td class="rcol"> </td>
+        </tr>
+    </tbody>
+</table>
+
+<table height="100">
+    <tbody>
+        <tr>
+            <td class="lcol"> Trabajadores: </td>
+            <td class="rcol"> </td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <tbody>
+        <tr>
+            <td class="lcol"> Fecha: </td>
+            <td class="rcol">  {{ tarea.date }} </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Hora: </td>
+            <td class="rcol">  {{ tarea.time }} </td>
+        </tr>
+        <tr>
+            <td class="lcol"> Local: </td>
+            <td class="rcol">  {{ tarea.pos_name}} </td>
+        </tr>
+        <tr>
+            <td class="lcol"> R. Social: </td>
+            <td class="rcol">  {{ tarea.client_name }} </td>
+        </tr>
+    </tbody>
+</table>
+{%- endmacro %}
+
+<html lang="es">
+    <head>
+        <link href="{{ url_for('static', filename='ticketstyles.css') }}" rel="stylesheet" type="text/css" />
+        <script charset="utf-8" type="text/javascript">
+            function print_doc(){
+                //INSTALL JS PRINT PLUGIN FIREFOX
+
+                jsPrintSetup.setOption('orientation', jsPrintSetup.kPortraitOrientation);
+                // set top margins in millimeters
+                jsPrintSetup.setOption('marginTop', 5);
+                jsPrintSetup.setOption('marginBottom', 5);
+                jsPrintSetup.setOption('marginLeft', 5);
+                jsPrintSetup.setOption('marginRight', 5);
+                // set page header
+                /*jsPrintSetup.setOption('headerStrLeft', 'My custom header');
+                jsPrintSetup.setOption('headerStrCenter', '');
+                jsPrintSetup.setOption('headerStrRight', '&PT');*/
+                // set empty page footer
+                jsPrintSetup.setOption('footerStrLeft', '');
+                jsPrintSetup.setOption('footerStrCenter', '');
+                jsPrintSetup.setOption('footerStrRight', '');
+                // Suppress print dialog
+                jsPrintSetup.setSilentPrint(true);/** Set silent printing*/
+                // Do Print
+                jsPrintSetup.print();
+                // Restore print dialog
+                //jsPrintSetup.setSilentPrint(false); /** Set silent printing back to false */
+                //if(jsPrintSetup.print()){alert("impreso");}else{alert("no impreso")}
+            }
+         </script>
+    </head>
+
+    <body onload="print_doc();windows.close();" onunload="jsPrintSetup.setSilentPrint(false);">
+        <div id="leftcol">
+            {{ ticket_div(tarea) }}
+            copia Administración
+        </div>
+
+        <div>
+            {{ ticket_div(tarea) }}
+            copia Operador
+        </div>
+    </body>
+</html>

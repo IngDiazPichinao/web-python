@@ -1,0 +1,543 @@
+{% extends "base.html" %}
+
+{% block head %}
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.6.1.js') }}"></script> -->
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/jquery_datatables.js') }}"></script> -->
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/jquery_jeditable.js') }}"></script> -->
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/jquery_maskedinput-1.3.min.js') }}"></script> -->
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.dataTables.min.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery_jeditable.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery_maskedinput-1.4.min.js') }}"></script>
+
+<link href="{{ url_for('static', filename='tablestyles.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ url_for('static', filename='stylesheet.css') }}"  rel="stylesheet" type="text/css"/>
+
+<style type="text/css">
+#datatable thead th.sorting {
+    background: url("{{ url_for('static', filename='sort_both.png') }}") no-repeat scroll right center transparent;
+}
+
+#datatable thead th.sorting_asc {
+    background: url("{{ url_for('static', filename='sort_asc.png') }}") no-repeat scroll right center transparent;
+}
+
+#datatable thead th.sorting_desc {
+    background: url("{{ url_for('static', filename='sort_desc.png') }}") no-repeat scroll right center transparent;
+}
+
+#semaphore {
+    width: 15px;
+}
+
+#impregnado {
+    width: 15px;
+}
+</style>
+<script charset="utf-8" type="text/javascript">
+
+$URL_ROOT = {{ request.script_root|tojson|safe }};
+
+function filter_numeric( sExpr, iData ) {
+    // If we get emtpy string as data while filtering, mark row to be excluded.
+    if (sExpr != '' && iData === '') {
+        return false;
+    }
+
+    var expr = sExpr.replace(/\s*/g, '').replace(/,/g, '.');
+    var data = parseFloat(iData);
+
+    if (expr.match(/^<-?\d+\.?\d*$/)) { // Less than.
+        var num = parseFloat(expr.match(/-?\d+\.?\d*/));
+        return data < num ? true : false;
+    }
+    else if (expr.match(/^>-?\d+\.?\d*$/)) { // Greater than.
+        var num = parseFloat(expr.match(/-?\d+\.?\d*/));
+        return data > num ? true : false;
+    }
+    else if (expr.match(/^!=-?\d+\.?\d*$/)) { // Not equal to.
+        var num = parseFloat(expr.match(/-?\d+\.?\d*/));
+        return data != num ? true : false;
+    }
+    else if (expr.match(/^-?\d+\.?\d*$/)) { // Equal to.
+        var num = parseFloat(expr.match(/-?\d+\.?\d*/));
+        return data == num ? true : false;
+    }
+    else if (expr.match(/^-?\d+\.?\d*--?\d+\.?\d*$/)) { // Between X and Y
+        var num1 = parseFloat(expr.match(/^-?\d+\.?\d*/));
+        var num2 = parseFloat(expr.match(/-?\d+\.?\d*$/));
+        return (data >= num1 && data <= num2) ? true : false;
+    }
+    else if (expr.match(/^<=-?\d+\.?\d*$/)) { // Less or equal than.
+        var num = parseFloat(expr.match(/-?\d+\.?\d*/));
+        return data <= num ? true : false;
+    }
+    else if (expr.match(/^>=-?\d+\.?\d*$/)) { // Greater or equal than.
+        var num = parseFloat(expr.match(/-?\d+\.?\d*/));
+        return data >= num ? true : false;
+    }
+
+    return true;
+}
+
+function filter_string( sExpr, sString ) {
+    var expr = sExpr.split(" ");
+    var str  = sString.toLowerCase();
+    var eval = true;
+
+    // There is nothing in the filter.
+    if (expr.length == 0) {
+        return true;
+    }
+
+    // Match string agains every term in the expression string.
+    for (var i = 0; i < expr.length; i++) {
+        if (str.match(expr[i].toLowerCase())) {
+            eval = eval & true;
+        } else {
+            eval = false;
+        }
+    }
+    return eval;
+}
+
+// Register the filters
+$.fn.dataTableExt.afnFiltering.push(
+    function( oSettings, aData, iDataIndex ) {
+        var oDataRow =  oSettings.aoData[iDataIndex].nTr; // Table Row
+        var filter_cols = $('thead input[class="filter"]');
+
+        return filter_string(filter_cols.get(0).value, aData[0] ) &       // NroPedido-Linea
+               filter_string(filter_cols.get(1).value, aData[1] ) &       // Fecha
+               filter_string(filter_cols.get(2).value, aData[2] ) &       // Local
+               filter_string(filter_cols.get(3).value, aData[3] ) &       // Cliente
+               filter_numeric(filter_cols.get(4).value, aData[4] * 1) &   // Cantidad
+               filter_string(filter_cols.get(5).value, aData[5] ) &       // Especie
+               filter_string(filter_cols.get(6).value, aData[6] ) &       // Disenio
+               filter_numeric(filter_cols.get(7).value, aData[7] * 1) &   // Espesor
+               filter_numeric(filter_cols.get(8).value, aData[8] * 1) &   // Ancho
+               filter_numeric(filter_cols.get(9).value, aData[9] * 1) &   // Largo
+               filter_string(filter_cols.get(10).value, aData[10] ) &     // Calidad
+               filter_string(filter_cols.get(11).value, aData[11] ) &     // Quality
+               filter_numeric(filter_cols.get(12).value, aData[12] * 1) & // Pulgadas
+               filter_numeric(filter_cols.get(13).value, aData[13] * 1) & // Humedad
+               filter_string(filter_cols.get(15).value, aData[15] ) &     // Estado
+               filter_string(filter_cols.get(16).value, aData[16] ) &     // Fecha Entrega Nota Pedido
+               filter_string(filter_cols.get(17).value, aData[17] ) &     // Fecha Entrega Estimada
+               filter_numeric(filter_cols.get(18).value, aData[18]) &     // Semanas Hasta Entrega
+               filter_string(filter_cols.get(19).value, aData[19] ) &     // Programa Aserrio
+               filter_string(filter_cols.get(20).value, aData[20] ) &     // Programa Elaboracion
+               filter_string(filter_cols.get(21).value, aData[21] ) &     // Observaciones
+               filter_numeric(filter_cols.get(22).value, aData[23] * 1)   // Semaphore
+    }
+);
+
+// Helper to smoothen filtering (to delay reaction of keyup event)
+var delay = ( function() {
+    var timer = 0;
+
+    return function(callback, ms) {
+        clearTimeout (timer);
+        timer = setTimeout(callback, ms);
+  };
+})();
+
+/*
+*       TICKET GENERATION AND PRINTING
+*/
+function generate_ticket(row) {
+    // Change status, save server side:
+    $.post(
+        $URL_ROOT + 'update_status',
+        {
+             "id": "status",
+             "tarea": row.id,
+             "value": 'asi'
+         },
+         print_ticket(row)
+     );
+}
+
+function print_ticket(row) {
+    // Finish generate_ticket(), change value of status (we are in a "success"
+    // callback of generate_ticket():
+    status = row.children[15];
+    status.textContent = "Asignado";
+
+    // deactivate the print button:
+    button = row.children[22].children[0];
+    button.disabled = true;
+
+    // Finally fetch ticket and print in a new window.
+    window.open($URL_ROOT + "tareas_ticket/" + row.id,
+                'Sizewindow', 'width=300, height=350, scrollbars=yes,toolbar=no');
+}
+
+/*
+*       jQuery INIT
+*/
+$(document).ready(function() {
+    /*
+    *   jQuery DataTable specific setup
+    */
+    var oTable = $('#datatable').dataTable( {
+        "sDom":          'ti',
+        "bPaginate":     false,
+        "bLengthChange": false,
+        "bSortCellsTop": true,
+        "bFilter":       true,
+        "bInfo":         true,
+        "bAutoWidth":    false,
+        "bSort":         true,
+        "aaSorting":     [ [ 16, "asc" ], [0, "asc"] ],
+        "aoColumnDefs":  [{ "bSortable": false, "aTargets": [ 22 ] }]
+        }
+    );
+
+    calcFooter(oTable);
+
+//     var asInitVals = new Array();
+
+    // Add event listeners to the filtering inputs
+    $('thead input[class="filter"]').keyup( function() {
+        delay( function() {
+            oTable.fnDraw();
+            calcFooter(oTable);
+        }, 200);
+    });
+
+    // Add event listeners to the "generate ticket" buttons
+    $('tr input[id="ticket"]').click(function() {
+        generate_ticket(this.parentNode.parentNode);
+    });
+
+
+    // Recalculate the sums of units and inches in the footer
+    function calcFooter( oTable ) {
+        // Get the sums of only the visible rows...
+        var sum_units = 0;
+        var sum_inches = 0;
+
+        var oSettings = oTable.fnSettings();
+        var rows = $('tbody tr', oSettings.nTable);
+
+        for ( var i=0 ; i<rows.length ; i++ ) {
+            sum_units  += parseInt(rows[i].children[4].textContent);
+            sum_inches += parseFloat(rows[i].children[12].textContent);
+        }
+
+        $('tfoot td[id="total_units"]').prop("textContent", sum_units);
+        $('tfoot td[id="total_inches"]').prop("textContent", sum_inches.toFixed(2));
+    }
+
+
+    /*
+    *   AJAX Functionality, and DataTable Editability
+    *
+    *   1) jEditable tweaks
+    *   2) Real Deal.
+    */
+    // Add support for masked input type to jEditable
+    $.editable.addInputType('masked', {
+        element : function(settings, original) {
+            // Create an input. Mask it using masked input plugin. Settings
+            // for mask can be passed with Jeditable settings hash.
+            var input = $('<input />').mask(settings.mask);
+            $(this).append(input);
+            return(input);
+        }
+    });
+
+    // ***************************
+    // Editability of some columns
+    // ***************************
+    // Manage Quality Column Editability
+    $('tr td[id="quality_enum"]').editable( $URL_ROOT + "update_quality", {
+        data:
+            {
+                null : "",
+                "00": "0-1",
+                "01": "1-2",
+                "02": "2-2",
+                "03": "3-3",
+                "04": "1-2",
+                "05": "2-2",
+                "06": "9-9",
+                "selected": null
+            },
+        type: "select",
+        onblur : "submit",
+        placeholder: "",
+
+        callback: function( sValue, y ) {
+            var aPos = oTable.fnGetPosition( this );
+            oTable.fnUpdate( sValue, aPos[0], aPos[1] );
+        },
+
+        submitdata : function ( value, settings ) {
+            return {
+                "tarea": this.parentNode.getAttribute('id')
+            };
+        }
+    } );
+
+    // Impregnado Checkbox Editability.
+    $('td input[id="impregnated"]').click(
+        function(event) {
+            // Vars in play
+            var tarea = this.parentNode.parentNode.getAttribute('id');
+            var value = this.checked;
+            var chkbx = this;
+
+            // Prevent default behaviour (toggle of checked/unchecked)
+            event.preventDefault();
+
+            // Ajax query itself
+            $.post(
+                $URL_ROOT + "update_impregnado", // URL
+                {"id"    : "impregnated",   // Data Dict
+                 "tarea" : tarea,
+                 "value" : value}
+            ).success(
+                function(data) {
+                    chkbx.checked = data == 'true' ? true : false;
+                }
+            );
+        }
+    );
+
+    // Manage Status Column Editability
+    $('tr td[id="status"]').editable( $URL_ROOT + 'update_status', {
+        data:
+            {
+                null: "",
+               "ase": "Aserrío",
+               "aso": "Aserrado",
+               "sec": "Secado",
+               "sen": "Secando",
+               "asi": "Asignado",
+               "imp": "Impregnando",
+               "fin": "Finalizado",
+               "des": "Despachado",
+               "sus": "Suspendido",
+               "anu": "Anulada",
+               "selected": null
+           },
+        type:        "select",
+        onblur:      "submit",
+        placeholder: "",
+
+        callback: function( sValue, y ) {
+            var aPos = oTable.fnGetPosition( this );
+            oTable.fnUpdate( sValue, aPos[0], aPos[1] );
+        },
+
+        submitdata : function ( value, settings ) {
+            return {
+                "tarea": this.parentNode.getAttribute('id')
+            };
+        }
+    } );
+
+    // Manage "delivery eta" Column Editability
+    $('tr td[id="date_delivery_eta"]').editable( $URL_ROOT + 'update_date', {
+        type: "masked",
+        mask: "9999-99-99",
+//         onblur: "submit",
+        width      : "6",
+        placeholder: "",
+
+        callback: function( sValue, y ) {
+            var aPos = oTable.fnGetPosition( this );
+            oTable.fnUpdate( sValue, aPos[0], aPos[1] );
+        },
+
+        submitdata: function ( value, settings ) {
+            // HACK: at the view generator side, there is a hack to deal with
+            // the ____-__-__ problem. God help me :S!.
+
+            return {
+                "id"   : "date_delivery_eta",
+                "tarea": this.parentNode.getAttribute('id')
+            };
+        }
+    } );
+
+    // Manage "programa aserrio" Column Editability
+    $('tr td[id="program_saving"]').editable( $URL_ROOT + 'update_production', {
+        type       : "text",
+        placeholder: "",
+
+        callback: function( sValue, y ) {
+            var aPos = oTable.fnGetPosition( this );
+            oTable.fnUpdate( sValue, aPos[0], aPos[1] );
+        },
+
+        submitdata: function ( value, settings ) {
+            return {
+                "id"   : "program_saving",
+                "tarea": this.parentNode.getAttribute('id')
+            };
+        }
+    } );
+
+    // Manage "programa elaboracion" Column Editability
+    $('tr td[id="program_finishing"]').editable( $URL_ROOT + 'update_production', {
+        type       : "text",
+        placeholder: "",
+
+        callback: function( sValue, y ) {
+            var aPos = oTable.fnGetPosition( this );
+            oTable.fnUpdate( sValue, aPos[0], aPos[1] );
+        },
+
+        submitdata: function ( value, settings ) {
+            return {
+                "id"   : "program_finishing",
+                "tarea": this.parentNode.getAttribute('id')
+            };
+        }
+    } );
+
+    // Manage "observaciones" Column Editability
+    $('tr td[id="observations"]').editable( $URL_ROOT + 'update_observation', {
+        type:   "text",
+        placeholder: "",
+
+        callback: function( sValue, y ) {
+            var aPos = oTable.fnGetPosition( this );
+            oTable.fnUpdate( sValue, aPos[0], aPos[1] );
+        },
+
+        submitdata: function ( value, settings ) {
+            return {
+                "id"   : "observations",
+                "tarea": this.parentNode.getAttribute('id')
+            };
+        }
+    } );
+} );
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div class="menu">
+    <ul>
+        <li>
+            <a target="_self" href="/home"> Informe </a>
+            <ul>
+                <li><a target="_self" href="/inventory"> Inventario </a></li>
+
+
+                <li><a target="_self" href="/orders"> Ordenes </a></li>
+            </ul>
+        </li>
+        <li class="logout"><a target="_self" href="/logout"> Cerrar Session </a></li>
+    </ul>
+</div>
+<div id="datatable_wrapper" class="dataTables_wrapper">
+    <table id="datatable">
+        <thead>
+            <tr>
+                <th class="sorting" rowspan="1" colspan="1"> Codigo </th>
+                <th class="sorting_asc" rowspan="1" colspan="1"> Fecha </th>
+                <th class="sorting" rowspan="1" colspan="1"> Loc. </th>
+                <th class="sorting" rowspan="1" colspan="1"> Cliente </th>
+                <th class="sorting" rowspan="1" colspan="1"> Cant. </th>
+                <th class="sorting" rowspan="1" colspan="1"> Esp. </th>
+                <th class="sorting" rowspan="1" colspan="1"> Diseño </th>
+                <th class="sorting" rowspan="1" colspan="1"> E" </th>
+                <th class="sorting" rowspan="1" colspan="1"> A! </th>
+                <th class="sorting" rowspan="1" colspan="1"> L </th>
+                <th class="sorting" rowspan="1" colspan="1"> C </th>
+                <th class="sorting" rowspan="1" colspan="1"> C* </th>
+                <th class="sorting" rowspan="1" colspan="1"> ("") </th>
+                <th class="sorting" rowspan="1" colspan="1"> H% </th>
+                <th id="impregnado" class="sorting" rowspan="1" colspan="1"> I </th>
+                <th class="sorting" rowspan="1" cols="1"> Est </th>
+                <th class="sorting" rowspan="1" cols="1"> FE-NP </th>
+                <th class="sorting" rowspan="1" cols="1"> FE-E </th>
+                <th class="sorting" rowspan="1" cols="1"> DHE </th>
+                <th class="sorting" rowspan="1" cols="1"> ProgASE </th>
+                <th class="sorting" rowspan="1" cols="1"> ProgELA </th>
+                <th class="sorting" rowspan="1" cols="1"> Observaciones </th>
+                <th class="sorting_disabled"> </th>
+                <th id="semaphore" class="sorting" rowspan="1" colspan="1"> </th>
+            </tr>
+            <tr>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="6"  name="search_numero"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="5"  name="search_fecha"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="5"  name="search_local"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="24" name="search_cliente"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="5"  name="search_cantidad"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="5"  name="search_especie"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="8"  name="search_disenio"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="4"  name="search_espesor"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="4"  name="search_ancho"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="4"  name="search_largo"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="2"  name="search_calidad"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="2"  name="search_quality"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="4"  name="search_pulgadas"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="5"  name="search_humedad"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="1"  name="search_impregnado"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="5"  name="search_estado"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="5"  name="search_fechaentrega_np"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="5"  name="search_fechaentrega"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="5"  name="search_fechaentrega_delta"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="8"  name="search_prog_ase"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="8"  name="search_prog_ela"></th>
+                <th rowspan="1" colspan="1"><input class="filter" type="text" size="16" name="search_observaciones"></th>
+                <th colspan="2" rowspan="1"><input class="filter" type="text" size="4" name="semaphore"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr id="{{ row.order_number ~ "-" ~ row.line_number }}" class="{{ loop.cycle('odd', 'even') }} green">
+                <td id="codigo"> {{ "%s-%02d"|format(row.order_number, row.line_number) }} </td>
+                <td class="sorting_1"> {{ row.date }} </td>
+                <td> {{ row.pos_name }} </td>
+                <td> {{ row.client_name }} </td>
+                <td> {{ row.amount }} </td>
+                <td> {{ row.species_tag }} </td>
+                <td> {{ row.design_tag }} </td>
+                <td> {{ row.thicknesses_thickness }} </td>
+                <td> {{ row.widths_width }} </td>
+                <td> {{ "%.2f"|format(row.lengths_length) }} </td>
+                <td id="calidad"> {{ row.quality_side_first |replace(None, "") }} </td>
+                <td id="quality_enum"> {{ row.quality_enum  |replace(None, "")}} </td>
+                <td> {{ "%.2f"|format(row.inches|round(2)) }} </td>
+                <td> {{ row.humidities_humidity }} </td>
+                <td><input id="impregnated" type="checkbox" {{ 'checked' if row.impregnated else None }}/> </td>
+                <td id="status"> {{ row.status|replace(None, "") }}</td>
+                <td id="date_delivery"> {{ row.date_delivery|replace(None, "") }}</td>
+                <td id="date_delivery_eta"> {{ row.date_delivery_eta|replace(None, "") }}</td>
+                <td id="timestamp_delivery"> {{ row.timestamp_delivery|replace(None, "") }}</td>
+                <td id="program_saving"> {{ row.program_saving|replace(None, "") }}</td>
+                <td id="program_finishing"> {{ row.program_finishing|replace(None, "") }}</td>
+                <td id="observations">  {{ row.observations|replace(None, "") }}</td>
+            {% if row.estado == "Asignado" or row.estado == "Finalizado" or row.design_tag == "BRUTO" %}
+                <td><input id="ticket" type="button" value="OT" disabled="" /></td>
+            {% else %}
+                <td><input id="ticket" type="button" value="OT" /></td>
+            {% endif %}
+                <td style="background-color:{{ row.semaphore }};">{{ row.semaphore_num }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" rowspan="1"></td>
+                <td id="total_units" rowspan="1" colspan="1"></td>
+                <td colspan="7" rowspan="1"></td>
+                <td id="total_inches" rowspan="1" colspan="1"></td>
+                <td colspan="8" rowspan="1"></td>
+            </tr>
+        </tfoot>
+
+    </table>
+    <div id="datatable_info" class="dataTables_info"></div>
+</div>
+
+{% endblock %}

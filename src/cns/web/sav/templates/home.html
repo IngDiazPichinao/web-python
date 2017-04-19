@@ -1,0 +1,25 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="menu">
+    <ul>
+        <li>
+            <a target="_self" href="/home"> Informe </a>
+            <ul>
+               <!---  <li><a target="_self" href="/inventory"> Inventario </a></li> -->
+
+
+                <li><a target="_self" href="/orders"> Ordenes </a></li>
+            </ul>
+        </li>
+
+
+
+
+        <li class="logout"><a target="_self" href="/logout"> Cerrar Session </a></li>
+    </ul>
+</div>
+
+{% endblock %}

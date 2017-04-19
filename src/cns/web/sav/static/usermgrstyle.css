@@ -1,0 +1,131 @@
+/**
+ *      USER ADMINISTRATION PANEL CSS
+ *
+ */
+
+body {
+    padding-top: 60px;
+/*     text-align: center; */
+    font: 14px "Lucida Sans Unicode","Bitstream Vera Sans","Trebuchet Unicode MS","Lucida Grande",Verdana,Helvetica,sans-serif;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 10px;
+}
+
+table#add_user td {
+    border: none;
+    text-align: right;
+}
+
+thead th {
+    height: 30px;
+}
+
+tbody td {
+    border: 1px solid grey;
+    height: 26px;
+    text-align: left;
+    padding-left: 10px;
+    padding-right: 14px;
+}
+
+tr.input_box td {
+    padding-top: 10px;
+    border: none;
+}
+
+td.icons {
+    padding-left: 8px;
+    padding-right: 8px;
+    border: none;
+    background-color: white;
+}
+
+tr.odd {
+    background-color: #C4FFC4;
+}
+
+tr.even {
+    background-color: #EEFFEE;
+}
+
+/* General Content Wrapper */
+div#content {
+    width: 1000px;
+    margin: auto;
+}
+
+
+/* User and Classes creation, assignments and selection panel */
+div#frame_manipulation {
+    float: left;
+/*    width: 1000px;
+    margin: auto;*/
+}
+
+div#frame_users {
+    float: left;
+    text-align: center;
+}
+
+div#frame_classes {
+    float: left;
+/*     margin-left: 30px; */
+}
+
+div#classes {
+    float: left;
+    text-align: center;
+    margin-left: 30px;
+}
+
+div#assigned_users {
+    float: left;
+    text-align: center;
+    margin-left: 30px;
+}
+
+/* Rights editing panel */
+div#frame_rights {
+    float: left;
+ /*   width: 1000px;
+    margin: auto;*/
+    margin-top: 20px;
+}
+
+div.right_box {
+    float: left;
+    text-align: center;
+}
+
+table.rights_table {
+    width: 210px;
+    border: 1px solid black;
+    border-collapse: collapse;
+    margin-left: 20px;
+}
+
+table.rights_table td.checkbox {
+    width: 20px;
+    border: none;
+    padding: 8px;
+}
+
+table.rights_table td.descriptor {
+    border: none;
+/*     padding: 8px; */
+    text-align: left;
+}
+
+tbody#tbody_relations td {
+    width: 100px;
+}
+
+
+/* General tweaks */
+img {
+    cursor: pointer;
+}
+

@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//ES">
+
+<html lang="es">
+    <title>
+        {{ title }}
+    </title>
+    <head>
+        {% block head %}
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <link href="{{ url_for('static', filename='stylesheet.css') }}" rel="stylesheet" type="text/css" />
+
+
+        {% endblock head %}
+    </head>
+
+    <body>
+        <div class="menu">
+        </div>
+        {% block content %}
+
+        {% endblock content %}
+    </body>
+</html>
